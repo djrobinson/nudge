@@ -1,12 +1,12 @@
 import websocket
 import json
 
-from server.sockets.socket_manager import SocketManager
+from server.sockets.base_socket import BaseSocket
 
-class PoloniexSocket(SocketManager):
+class PoloniexSocket(BaseSocket):
 
     def __init__(self):
-        SocketManager.__init__(self)
+        BaseSocket.__init__(self)
         self.market = "Poloniex"
         self.socket_url = "wss://api2.poloniex.com/"
         self.ws = None
@@ -25,7 +25,7 @@ class PoloniexSocket(SocketManager):
     def market_close_ws(self):
         self.ws.close()
 
-    def market_on_open(self):
+    def market_init(self):
         payload = json.dumps({'command': 'subscribe', 'channel': 'BTC_XMR'})
         self.ws.send(payload)
 

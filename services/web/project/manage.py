@@ -7,7 +7,6 @@ import redis
 from rq import Connection, Worker
 from flask_script import Manager
 
-from server.sockets.socket_manager import SocketManager
 from server import app
 
 

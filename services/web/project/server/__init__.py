@@ -1,5 +1,7 @@
 # services/web/server/__init__.py
 
+from dotenv import load_dotenv
+load_dotenv()
 
 import os
 
@@ -11,7 +13,6 @@ app = Flask(
     template_folder='../client/templates',
     static_folder='../client/static'
 )
-
 
 app_settings = os.getenv(
     'APP_SETTINGS',

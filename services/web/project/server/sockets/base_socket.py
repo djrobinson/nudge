@@ -2,15 +2,15 @@ import json
 import time
 import _thread
 
-class SocketManager:
+class BaseSocket:
 
     def __init__(self):
-
         self.market = None
 
-    # do all of the saves here
+    # do all of the saves & broadcasts here
     def on_message(self, message):
         print(message)
+        parsed_message = self.market_parse_message(message)
 
     def on_error(self, error):
         print(error)
@@ -36,5 +36,9 @@ class SocketManager:
     def market_close_ws(self):
         raise NotImplmentedError("market_close_ws must be implemented by an exchange")
 
-    def market_on_open(self):
+    def market_init(self):
         raise NotImplementedError("market_on_open must be implemented by an exchange")
+
+    def market_parse_message(self, message):
+        raise NotImplementedError("market_on_open must be implemented by an exchange")
+
