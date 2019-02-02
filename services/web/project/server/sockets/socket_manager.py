@@ -1,33 +1,39 @@
 import websocket
-import thread
+import _thread
 import time
 import json
 
-def on_message(ws, message):
-    print(message)
 
-def on_error(ws, error):
-    print(error)
+class SocketManager:
 
-def on_close(ws):
-    print("### closed ###")
+    def __init__(self):
+        self.ws = None
 
-def on_open(ws):
-    print("ONOPEN")
-    def run(*args):
-        ws.send(json.dumps({'command':'subscribe','channel':'BTC_XMR'}))
-        while True:
-            time.sleep(1)
-        ws.close()
-        print("thread terminating...")
-    thread.start_new_thread(run, ())
+    def on_message(self, message):
+        print(message)
+
+    def on_error(self, error):
+        print(error)
+
+    def on_close(self):
+        print("### closed ###")
+
+    def on_open(self):
+        print("ONOPEN")
+        payload = json.dumps({'command':'subscribe','channel':'BTC_XMR'})
+        _thread.start_new_thread(self.ws.send(payload), ())
+
+    def stop_ws(self):
+        self.ws.close()
 
 
-def start_ws():
-    websocket.enableTrace(True)
-    ws = websocket.WebSocketApp("wss://api2.poloniex.com/",
-                              on_message = on_message,
-                              on_error = on_error,
-                              on_close = on_close)
-    ws.on_open = on_open
-    ws.run_forever()
+    def start_ws(self):
+        print("Starting Websocket 1")
+        websocket.enableTrace(True)
+        print("Starting Websocket 2")
+        self.ws = websocket.WebSocketApp("wss://api2.poloniex.com/",
+                                  on_message = self.on_message,
+                                  on_error = self.on_error,
+                                  on_close = self.on_close)
+        self.ws.on_open = self.on_open
+        self.ws.run_forever()

@@ -6,6 +6,7 @@ from rq import Queue, push_connection, pop_connection
 from flask import current_app, render_template, Blueprint, jsonify, request
 
 from server.tasks.tasks import create_task
+from server.sockets.socket_manager import SocketManager
 
 main_blueprint = Blueprint('tasks', __name__,)
 
@@ -54,3 +55,10 @@ def push_rq_connection():
 @main_blueprint.teardown_request
 def pop_rq_connection(exception=None):
     pop_connection()
+
+
+@main_blueprint.route('/websockets/start/<market_id>', methods=['GET'])
+def start_websocket(market_id):
+    print("Recognizing route")
+    socket_manager = SocketManager()
+    socket_manager.start_ws()

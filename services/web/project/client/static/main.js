@@ -21,12 +21,11 @@ $('.btn').on('click', function() {
 
 $('#start-sockets').on('click', () => {
   $.ajax({
-    url: '/start_sockets',
-    data: { words: $(this).text() },
-    method: 'POST'
+    url: '/websockets/start/POLO',
+    method: 'GET'
   })
   .done((res) => {
-    console.log("What is reponse from start sockets")
+    console.log("What is reponse from start sockets", res)
   })
   .fail((err) => {
     console.log(err)
