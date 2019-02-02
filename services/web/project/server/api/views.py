@@ -6,7 +6,7 @@ from rq import Queue, push_connection, pop_connection
 from flask import current_app, render_template, Blueprint, jsonify, request
 
 from server.tasks.tasks import create_task
-from server.sockets.socket_manager import SocketManager
+from server.sockets.exchanges.poloniex_socket import PoloniexSocket
 
 main_blueprint = Blueprint('tasks', __name__,)
 
@@ -60,5 +60,5 @@ def pop_rq_connection(exception=None):
 @main_blueprint.route('/websockets/start/<market_id>', methods=['GET'])
 def start_websocket(market_id):
     print("Recognizing route")
-    socket_manager = SocketManager()
+    socket_manager = PoloniexSocket()
     socket_manager.start_ws()
