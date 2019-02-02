@@ -1,17 +1,4 @@
-# Flask + Redis Queue + PySpark + Docker
+# wip
 
-Example of how to handle long-running Spark processes with Flask, Redis Queue, PySpark, and Docker
+Flask + Redis Queue + PySpark + Docker
 
-### Quick Start
-
-Spin up the containers:
-
-```sh
-$ docker-compose up -d --build
-```
-
-Open your browser to http://localhost:5009
-
-### Example
-
-![](app.png)

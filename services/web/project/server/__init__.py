@@ -20,5 +20,5 @@ app_settings = os.getenv(
 app.config.from_object(app_settings)
 
 
-from server.main.views import main_blueprint
+from server.api.views import main_blueprint
 app.register_blueprint(main_blueprint)

@@ -1,13 +1,13 @@
-# services/web/server/main/views.py
+# services/web/server/api/views.py
 
 
 import redis
 from rq import Queue, push_connection, pop_connection
 from flask import current_app, render_template, Blueprint, jsonify, request
 
-from server.main.tasks import create_task
+from server.tasks.tasks import create_task
 
-main_blueprint = Blueprint('main', __name__,)
+main_blueprint = Blueprint('tasks', __name__,)
 
 @main_blueprint.route('/', methods=['GET'])
 def home():
