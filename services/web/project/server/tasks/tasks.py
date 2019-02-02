@@ -1,5 +1,3 @@
-# services/web/server/api/views.py
-
 
 try:
     from pyspark import SparkContext, SparkConf

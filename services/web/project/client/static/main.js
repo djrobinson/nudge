@@ -19,6 +19,20 @@ $('.btn').on('click', function() {
   })
 })
 
+$('#start-sockets').on('click', () => {
+  $.ajax({
+    url: '/start_sockets',
+    data: { words: $(this).text() },
+    method: 'POST'
+  })
+  .done((res) => {
+    console.log("What is reponse from start sockets")
+  })
+  .fail((err) => {
+    console.log(err)
+  })
+})
+
 function getStatus(taskID) {
   $.ajax({
     url: `/tasks/${taskID}`,
