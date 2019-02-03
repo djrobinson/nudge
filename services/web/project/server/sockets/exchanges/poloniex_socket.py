@@ -3,7 +3,8 @@ import json
 
 from server.sockets.base_socket import BaseSocket
 
-class PoloniexSocket(BaseSocket):
+
+class PoloniexWS(BaseSocket):
 
     def __init__(self):
         BaseSocket.__init__(self)
