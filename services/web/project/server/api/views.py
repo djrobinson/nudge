@@ -59,9 +59,17 @@ def pop_rq_connection(exception=None):
     pop_connection()
 
 
-@main_blueprint.route('/websockets/start/<market_id>', methods=['GET'])
-def start_websocket(market_id):
-    print("Recognizing route")
+@main_blueprint.route('/websockets/start', methods=['GET'])
+def start_websocket():
+    print("Starting")
     socket_manager = BinanceWS()
     socket_manager.start_ws()
+    return jsonify({ "response": True })
+
+
+@main_blueprint.route('/websockets/stop', methods=['GET'])
+def stop_websocket():
+    print("Stopping")
+    socket_manager = BinanceWS()
+    socket_manager.stop_ws()
     return jsonify({ "response": True })

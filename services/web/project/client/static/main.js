@@ -12,7 +12,7 @@ $('.btn').on('click', function() {
     method: 'POST'
   })
   .done((res) => {
-    getStatus(res.data.task_id)
+    console.log("What it is: ", res)
   })
   .fail((err) => {
     console.log(err)
@@ -21,7 +21,7 @@ $('.btn').on('click', function() {
 
 $('#start-sockets').on('click', () => {
   $.ajax({
-    url: '/websockets/start/POLO',
+    url: '/websockets/start',
     method: 'GET'
   })
   .done((res) => {
@@ -32,26 +32,17 @@ $('#start-sockets').on('click', () => {
   })
 })
 
-function getStatus(taskID) {
+$('#stop-sockets').on('click', () => {
   $.ajax({
-    url: `/tasks/${taskID}`,
+    url: '/websockets/stop',
     method: 'GET'
   })
   .done((res) => {
-    const html = `
-      <tr>
-        <td>${res.data.task_id}</td>
-        <td>${res.data.task_status}</td>
-        <td>${JSON.stringify(res.data.task_result)}</td>
-      </tr>`
-    $('#tasks').prepend(html)
-    const taskStatus = res.data.task_status;
-    if (taskStatus === 'finished' || taskStatus === 'failed') return false;
-    setTimeout(function() {
-      getStatus(res.data.task_id);
-    }, 1000);
+    console.log("What is reponse from stop sockets", res)
   })
   .fail((err) => {
     console.log(err)
   })
-}
+})
+
+
