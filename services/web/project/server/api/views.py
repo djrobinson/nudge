@@ -62,7 +62,7 @@ def pop_rq_connection(exception=None):
 @main_blueprint.route('/websockets/start', methods=['GET'])
 def start_websocket():
     print("Starting")
-    socket_manager = BinanceWS()
+    socket_manager = PoloniexWS()
     socket_manager.start_ws()
     return jsonify({ "response": True })
 
@@ -70,6 +70,6 @@ def start_websocket():
 @main_blueprint.route('/websockets/stop', methods=['GET'])
 def stop_websocket():
     print("Stopping")
-    socket_manager = BinanceWS()
+    socket_manager = PoloniexWS()
     socket_manager.stop_ws()
     return jsonify({ "response": True })

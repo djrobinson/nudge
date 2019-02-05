@@ -50,4 +50,5 @@ class BinanceWS(BaseSocket):
         print("open")
 
     def market_parse_message(self, msg):
+        # {'e': 'trade', 'E': 1549338783436, 's': 'ETHBTC', 't': 105446337, 'p': '0.03098000', 'q': '2.67500000', 'b': 274075944, 'a': 274085370, 'T': 1549338783428, 'm': True, 'M': True}
         print("parse")

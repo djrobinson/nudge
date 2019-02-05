@@ -23,7 +23,7 @@ class BittrexWS(BaseSocket):
                         trade_history[msg['M']] = []
                     # Add history nounce
                     trade_history[msg['M']].append(msg)
-                    on_message('[Trades]: {}'.format(msg['M']))
+                    on_message('[Trades]: {}'.format(msg))
 
         # Create container
         trade_history = {}
@@ -51,6 +51,7 @@ class BittrexWS(BaseSocket):
         print("open")
 
     def market_parse_message(self, msg):
+        # {'M': 'BTC-NEO', 'N': 359942, 'Z': [], 'S': [{'TY': 0, 'R': 0.00213594, 'Q': 548.601}, {'TY': 1, 'R': 0.00213712, 'Q': 0.0}], 'f': [], 'invoke_type': 'SubscribeToExchangeDeltas'}
         print("parse")
 
     def market_close_ws(self):
