@@ -45,4 +45,15 @@ $('#stop-sockets').on('click', () => {
   })
 })
 
-
+$('#start-kafka').on('click', () => {
+  $.ajax({
+    url: '/test_kafka',
+    method: 'GET'
+  })
+  .done((res) => {
+    console.log("What is reponse from kafka", res)
+  })
+  .fail((err) => {
+    console.log(err)
+  })
+})

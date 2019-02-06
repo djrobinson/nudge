@@ -10,6 +10,8 @@ from server.sockets.exchanges.poloniex_socket import PoloniexWS
 from server.sockets.exchanges.bittrex_socket import BittrexWS
 from server.sockets.exchanges.binance_socket import BinanceWS
 
+from kafka import KafkaConsumer
+
 main_blueprint = Blueprint('tasks', __name__,)
 
 @main_blueprint.route('/', methods=['GET'])
@@ -73,3 +75,15 @@ def stop_websocket():
     socket_manager = PoloniexWS()
     socket_manager.stop_ws()
     return jsonify({ "response": True })
+
+
+@main_blueprint.route('/test_kafka', methods=['GET'])
+def test_kafka():
+    consumer = KafkaConsumer('test', bootstrap_servers=['192.168.99.100:9092'])
+    all_msgs = []
+    for msg in consumer:
+        all_msgs.append(msg)
+    return jsonify({
+        "khafka_response": all_msgs
+    })
+
