@@ -57,3 +57,16 @@ $('#start-kafka').on('click', () => {
     console.log(err)
   })
 })
+
+$('#kafka-consumer').on('click', () => {
+  $.ajax({
+    url: '/kafka_consumer',
+    method: 'GET'
+  })
+  .done((res) => {
+    console.log("What is reponse from kafka", res)
+  })
+  .fail((err) => {
+    console.log(err)
+  })
+})

@@ -1,7 +1,7 @@
 # services/web/server/api/views.py
 
-
 import redis
+import json
 from rq import Queue, push_connection, pop_connection
 from flask import current_app, render_template, Blueprint, jsonify, request
 
@@ -10,7 +10,7 @@ from server.sockets.exchanges.poloniex_socket import PoloniexWS
 from server.sockets.exchanges.bittrex_socket import BittrexWS
 from server.sockets.exchanges.binance_socket import BinanceWS
 
-from kafka import KafkaConsumer
+from kafka import KafkaProducer, KafkaConsumer, TopicPartition
 
 main_blueprint = Blueprint('tasks', __name__,)
 
@@ -77,13 +77,23 @@ def stop_websocket():
     return jsonify({ "response": True })
 
 
+@main_blueprint.route('/kafka_consumer', methods=['GET'])
+def kafka_consumer():
+    consumer = KafkaConsumer(bootstrap_servers='kafka:9092')
+    consumer.subscribe(['dingo_topic'])
+    all_msg = []
+    return jsonify({
+        "consumer_res": all_msg
+    })
+
 @main_blueprint.route('/test_kafka', methods=['GET'])
 def test_kafka():
-    consumer = KafkaConsumer('test', bootstrap_servers=['192.168.99.100:9092'])
-    all_msgs = []
-    for msg in consumer:
-        all_msgs.append(msg)
+    producer = KafkaProducer(bootstrap_servers='kafka:9092', value_serializer=lambda v: json.dumps(v).encode('utf-8'))
+    producer.send('dingo_topic', { 'test': 'some arguments'})
     return jsonify({
-        "khafka_response": all_msgs
+        "khafka_response": "sent"
     })
+
+
+
 
