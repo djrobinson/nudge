@@ -5,7 +5,7 @@ import json
 from rq import Queue, push_connection, pop_connection
 from flask import current_app, render_template, Blueprint, jsonify, request
 
-from server.tasks.tasks import create_task
+from server.tasks.tasks import create_task, kafka_task
 from server.sockets.exchanges.poloniex_socket import PoloniexWS
 from server.sockets.exchanges.bittrex_socket import BittrexWS
 from server.sockets.exchanges.binance_socket import BinanceWS
@@ -94,6 +94,14 @@ def test_kafka():
         "khafka_response": "sent"
     })
 
-
-
-
+@main_blueprint.route('/send_to_kafka', methods=['GET'])
+def send_to_kafka():
+    q = Queue()
+    task = q.enqueue(kafka_task)
+    response_object = {
+        'status': 'success',
+        'data': {
+            'task_id': task.get_id()
+        }
+    }
+    return jsonify(response_object), 202
