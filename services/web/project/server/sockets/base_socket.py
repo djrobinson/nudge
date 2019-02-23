@@ -1,5 +1,6 @@
 import json
 import time
+from server.objects.kafka.kafka_producer import KafkaProducer
 
 class BaseSocket:
 
@@ -31,7 +32,7 @@ class BaseSocket:
         raise NotImplementedError("market_start_ws must be implemented by an exchange")
 
     def market_close_ws(self):
-        raise NotImplmentedError("market_close_ws must be implemented by an exchange")
+        raise NotImplementedError("market_close_ws must be implemented by an exchange")
 
     def market_init(self):
         raise NotImplementedError("market_init must be implemented by an exchange")

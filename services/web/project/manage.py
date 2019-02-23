@@ -1,6 +1,4 @@
 # manage.py
-
-
 import os
 
 import redis

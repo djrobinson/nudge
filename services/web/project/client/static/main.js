@@ -28,32 +28,6 @@ $('#stop-sockets').on('click', () => {
   })
 })
 
-$('#start-kafka').on('click', () => {
-  $.ajax({
-    url: '/test_kafka',
-    method: 'GET'
-  })
-  .done((res) => {
-    console.log("What is reponse from kafka", res)
-  })
-  .fail((err) => {
-    console.log(err)
-  })
-})
-
-$('#kafka-consumer').on('click', () => {
-  $.ajax({
-    url: '/send_to_kafka',
-    method: 'GET'
-  })
-  .done((res) => {
-    console.log("What is reponse from kafka2", res)
-    getStatus(res.data.task_id)
-  })
-  .fail((err) => {
-    console.log(err)
-  })
-})
 
 function getStatus(taskID) {
   $.ajax({

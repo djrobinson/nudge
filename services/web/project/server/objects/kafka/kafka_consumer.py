@@ -3,12 +3,13 @@
 
 from kafka import KafkaConsumer
 from kafka import TopicPartition
-import log
+from server.log.log import getLogger
 import json
 
-class KafkaConsumer(object):
 
-    logger = log.getLogger('kafkaconsumer')
+class NudgeConsumer(object):
+
+    logger = getLogger('kafkaconsumer')
 
     """Instantiating Kafka consumer for given brokers."""
     def __init__(self, kafka_brokers, kafka_topic_name):
@@ -44,4 +45,3 @@ class KafkaConsumer(object):
                 list.append(json.loads(message.value))
         #print (message.offset, message.topic, message.key.decode('utf-8'))
 	return list
-

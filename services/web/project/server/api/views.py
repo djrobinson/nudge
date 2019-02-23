@@ -5,7 +5,7 @@ import json
 from rq import Queue, push_connection, pop_connection
 from flask import current_app, render_template, Blueprint, jsonify, request, Response
 
-from server.tasks.tasks import create_task, kafka_task
+from server.tasks.tasks import create_task
 from server.sockets.exchanges.poloniex_socket import PoloniexWS
 from server.sockets.exchanges.bittrex_socket import BittrexWS
 from server.sockets.exchanges.binance_socket import BinanceWS
@@ -75,36 +75,3 @@ def stop_websocket():
     socket_manager.stop_ws()
     return jsonify({ "response": True })
 
-
-@main_blueprint.route('/kafka_consumer', methods=['GET'])
-def kafka_consumer():
-    consumer.subscribe(['dingo_topic'])
-    all_msg = []
-    return jsonify({
-        "consumer_res": all_msg
-    })
-
-
-@main_blueprint.route('/test_kafka', methods=['GET'])
-def test_kafka():
-    future = producer.send('dingo_topic', b'test354')
-
-    try:
-        record_metadata = future.get(timeout=10)
-        return jsonify(record_metadata), 200
-    except KafkaError:
-        # Decide what to do if produce request failed...
-        print("kafka error")
-        return "kafka error", 500
-
-
-@main_blueprint.route('/send_to_kafka', methods=['GET'])
-def send_to_kafka():
-    consumer = KafkaConsumer('dingo-topic', bootstrap_servers='kafka:9092')
-    all_msg = []
-    for msg in consumer:
-        print("kafka msg: ", msg.value.decode('utf-8'))
-        all_msg.append(str(msg.value))
-    return dict({
-        "consumer_res": all_msg
-    })
