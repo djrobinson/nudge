@@ -2,6 +2,7 @@
 
 import redis
 import json
+import datetime
 from rq import Queue, push_connection, pop_connection
 from flask import current_app, render_template, Blueprint, jsonify, request, Response
 
@@ -9,6 +10,8 @@ from server.tasks.tasks import create_task
 from server.sockets.exchanges.poloniex_socket import PoloniexWS
 from server.sockets.exchanges.bittrex_socket import BittrexWS
 from server.sockets.exchanges.binance_socket import BinanceWS
+
+from server.objects.kafka.market_consumer import MarketConsumer
 
 
 main_blueprint = Blueprint('tasks', __name__,)
@@ -74,4 +77,20 @@ def stop_websocket():
     socket_manager = PoloniexWS()
     socket_manager.stop_ws()
     return jsonify({ "response": True })
+
+
+@main_blueprint.route('/show_transactions', methods=['GET'])
+def show_transactions():
+    api_call_time = datetime.datetime.now()
+    api_call_time = api_call_time.strftime("%Y-%m-%d %H:%M:%S")
+    print("show_transactions API request made at " + api_call_time)
+    market = MarketConsumer('kafka:9092', 'TestMeister')
+    transaction_list = market.consume_messages()
+    if len(transaction_list) == 0:
+        return "Kafka Topic is empty"
+    a = []
+    for i in transaction_list:
+        a.append(json.loads(i))
+    transactions = a
+    return jsonify(transactions)
 

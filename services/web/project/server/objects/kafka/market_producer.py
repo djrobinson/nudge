@@ -5,7 +5,7 @@ from kafka import KafkaProducer
 import json
 from server.log.log import getLogger
 
-class NudgeProducer(object):
+class MarketProducer(object):
 
     logger = getLogger('kafkaproducer')
 

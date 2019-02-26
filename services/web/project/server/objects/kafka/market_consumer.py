@@ -7,7 +7,7 @@ from server.log.log import getLogger
 import json
 
 
-class NudgeConsumer(object):
+class MarketConsumer(object):
 
     logger = getLogger('kafkaconsumer')
 
@@ -43,5 +43,4 @@ class NudgeConsumer(object):
                 if message.offset >= end:
                     break
                 list.append(json.loads(message.value))
-        #print (message.offset, message.topic, message.key.decode('utf-8'))
-	return list
+        return list

@@ -1,6 +1,6 @@
 import json
 import time
-from server.objects.kafka.kafka_producer import KafkaProducer
+from server.objects.kafka.market_producer import MarketProducer
 
 class BaseSocket:
 
