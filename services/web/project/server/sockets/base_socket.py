@@ -6,13 +6,14 @@ class BaseSocket:
 
     def __init__(self):
         self.market = None
+        self.producer = MarketProducer('kafka:9092')
 
     # do all of the saves & broadcasts here
     def on_message(self, message):
-        print(message)
+        # print(message)
         # maybe log original message?
         parsed_message = self.market_parse_message(message)
-
+        self.producer.send_transaction_data(message, 'TestMeister')
 
     def on_error(self, error):
         print(error)

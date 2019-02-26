@@ -28,7 +28,7 @@ class MarketConsumer(object):
     message value and key are raw bytes -- decode if necessary!
     e.g., for unicode: `message.value.decode('utf-8')`
     """
-    def consume_messages(self):
+    def consume_all_messages(self):
         self.consumer.seek_to_end()
         end = self.consumer.position(self.partition) - 1
         self.consumer.seek_to_beginning()
@@ -37,10 +37,22 @@ class MarketConsumer(object):
         if start == end:
             self.logger.info("No message in topic")
             self.consumer.close()
-        
+            return "No message in topic"
+
         else:
             for message in self.consumer:
                 if message.offset >= end:
+                    break
+                list.append(json.loads(message.value))
+        return list
+
+    def consume_some(self, message_count):
+        self.consumer.seek_to_beginning()
+        start = self.consumer.position(self.partition) - 1
+        list = []
+        if start:
+            for message in self.consumer:
+                if message.offset >= message_count:
                     break
                 list.append(json.loads(message.value))
         return list
