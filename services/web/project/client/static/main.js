@@ -1,5 +1,6 @@
 $( document ).ready(() => {
   console.log('Sanity Check!');
+
 });
 
 $('#start-sockets').on('click', () => {
@@ -8,7 +9,7 @@ $('#start-sockets').on('click', () => {
     method: 'GET'
   })
   .done((res) => {
-    console.log("What is reponse from start sockets", res)
+    console.log("What is response from start sockets", res)
   })
   .fail((err) => {
     console.log(err)
@@ -21,7 +22,7 @@ $('#stop-sockets').on('click', () => {
     method: 'GET'
   })
   .done((res) => {
-    console.log("What is reponse from stop sockets", res)
+    console.log("What is response from stop sockets", res)
   })
   .fail((err) => {
     console.log(err)

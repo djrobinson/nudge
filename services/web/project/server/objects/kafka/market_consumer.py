@@ -5,6 +5,7 @@ from kafka import KafkaConsumer
 from kafka import TopicPartition
 from server.log.log import getLogger
 import json
+import faust
 
 
 class MarketConsumer(object):
@@ -14,6 +15,10 @@ class MarketConsumer(object):
     """Instantiating Kafka consumer for given brokers."""
     def __init__(self, kafka_brokers, kafka_topic_name):
         self.logger.info("The kafka broker address:"+kafka_brokers)
+
+        self.kafka_brokers = kafka_brokers
+        self.kafka_topic_name = kafka_topic_name
+
         try:
             self.consumer = KafkaConsumer(bootstrap_servers=kafka_brokers)
         except:
@@ -22,6 +27,7 @@ class MarketConsumer(object):
             self.partition = TopicPartition(kafka_topic_name, 0)
         except:
             self.logger.error("Check if the topic exists and the partition number is correct")
+
         self.consumer.assign([self.partition])
     """
     Consuming the input message from the Kafka topic through kafka consumer. Kafka is configured to retain the logs for only 3hours. Consumption from start till end will lead to consumption of transactions in the last 3 hours
@@ -38,13 +44,27 @@ class MarketConsumer(object):
             self.logger.info("No message in topic")
             self.consumer.close()
             return "No message in topic"
-
         else:
             for message in self.consumer:
                 if message.offset >= end:
                     break
                 list.append(json.loads(message.value))
         return list
+
+    def test_faust(self):
+        print('Testing Faust')
+        app = faust.App(
+            'nudgeapp',
+            broker=self.kafka_brokers,
+            value_serializer='raw',
+        )
+
+        test_topic = app.topic(self.kafka_topic_name)
+
+        @app.agent(test_topic)
+        async def testing_faust_stream(messages):
+            async for msg in messages:
+                print('Faust messages %s' % msg)
 
     def consume_some(self, message_count):
         self.consumer.seek_to_beginning()

@@ -6,7 +6,11 @@ from rq import Connection, Worker
 from flask_script import Manager
 
 from server import app
+from flask_socketio import SocketIO
 
+socketio = SocketIO()
+
+socketio.init_app(app)
 
 manager = Manager(app)
 
