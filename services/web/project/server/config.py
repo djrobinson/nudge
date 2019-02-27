@@ -8,8 +8,6 @@ class BaseConfig(object):
     """Base configuration."""
     DEBUG = False
     WTF_CSRF_ENABLED = True
-    REDIS_URL = 'redis://redis:6379/0'
-    QUEUES = ['default']
 
 
 class DevelopmentConfig(BaseConfig):

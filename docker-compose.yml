@@ -84,28 +84,13 @@ services:
       - './services/web/project:/usr/src/app'
     ports:
       - 5009:5000
-    command: python manage.py runserver -h 0.0.0.0
+    command: python -u manage.py runserver -h 0.0.0.0
     environment:
       - APP_SETTINGS=server.config.DevelopmentConfig
+      - PYTHONUNBUFFERED=0
     links:
       - spark-master
       - spark-worker
     depends_on:
-      - redis
       - spark-master
       - spark-worker
-
-  worker:
-    image: web
-    container_name: redis-worker
-    environment:
-      - APP_SETTINGS=server.config.DevelopmentConfig
-    command: spark-submit --master spark://spark-master:7077 --class endpoint manage.py run_worker
-    volumes:
-      - './services/web/project:/usr/src/app'
-    depends_on:
-      - redis
-      - web
-
-  redis:
-    image: redis:3.2.11

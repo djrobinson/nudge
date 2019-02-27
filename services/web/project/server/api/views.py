@@ -1,9 +1,7 @@
 # services/web/server/api/views.py
 
-import redis
 import json
 import datetime
-from rq import Queue, push_connection, pop_connection
 from flask import current_app, render_template, Blueprint, jsonify, request
 
 from server.tasks.tasks import create_task
@@ -17,16 +15,21 @@ from server import socketio
 
 @socketio.on('connect')
 def test_connect():
+    print('test')
     emit('my response', {'data': 'Connected'})
+    return 'connected'
 
 @socketio.on('message')
 def handle_message(message):
     print('In socket')
     print('received message: ' + message)
+    emit('my response', {})
+    return 'worked'
 
 @socketio.on('my event')
 def handle_my_custom_event(json):
-    print('received json: ' + str(json))
+    print('received json : ' + str(json))
+    return 'custom event'
 
 
 main_blueprint = Blueprint('tasks', __name__,)
@@ -34,48 +37,6 @@ main_blueprint = Blueprint('tasks', __name__,)
 @main_blueprint.route('/', methods=['GET'])
 def home():
     return render_template('main/home.html')
-
-
-@main_blueprint.route('/tasks', methods=['POST'])
-def run_task():
-    words = request.form['words']
-    q = Queue()
-    task = q.enqueue(create_task, words)
-    response_object = {
-        'status': 'success',
-        'data': {
-            'task_id': task.get_id()
-        }
-    }
-    return jsonify(response_object), 202
-
-
-@main_blueprint.route('/tasks/<task_id>', methods=['GET'])
-def get_status(task_id):
-    q = Queue()
-    task = q.fetch_job(task_id)
-    if task:
-        response_object = {
-            'status': 'success',
-            'data': {
-                'task_id': task.get_id(),
-                'task_status': task.get_status(),
-                'task_result': task.result,
-            }
-        }
-    else:
-        response_object = {'status': 'error'}
-    return jsonify(response_object)
-
-
-@main_blueprint.before_request
-def push_rq_connection():
-    push_connection(redis.from_url(current_app.config['REDIS_URL']))
-
-
-@main_blueprint.teardown_request
-def pop_rq_connection(exception=None):
-    pop_connection()
 
 
 @main_blueprint.route('/websockets/start', methods=['GET'])
@@ -101,7 +62,7 @@ def test_faust():
     print("Test Faust request made at " + api_call_time)
     market = MarketConsumer('kafka:9092', 'TestMeister')
     market.test_faust()
-    return "Testing Faust Called"
+    return "Testing Faust  Called"
 
 
 @main_blueprint.route('/show_transactions', methods=['GET'])
