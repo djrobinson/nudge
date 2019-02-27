@@ -6,6 +6,7 @@ load_dotenv()
 import os
 
 from flask import Flask
+from flask_socketio import SocketIO
 
 
 app = Flask(
@@ -13,6 +14,8 @@ app = Flask(
     template_folder='../client/templates',
     static_folder='../client/static'
 )
+
+socketio = SocketIO(app)
 
 app_settings = os.getenv(
     'APP_SETTINGS',

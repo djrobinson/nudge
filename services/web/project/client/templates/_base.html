@@ -12,6 +12,7 @@
     <script type="text/javascript" charset="utf-8">
         var socket = io.connect('http://' + document.domain + ':5009');
         console.log("Do we have a socket: ", socket)
+
         socket.on('connect', function() {
             socket.emit('my event', {data: 'I\'m connected!'});
         });

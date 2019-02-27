@@ -11,7 +11,13 @@ from server.sockets.exchanges.poloniex_socket import PoloniexWS
 
 from server.objects.kafka.market_consumer import MarketConsumer
 
-from manage import socketio
+from flask_socketio import emit
+from server import socketio
+
+
+@socketio.on('connect')
+def test_connect():
+    emit('my response', {'data': 'Connected'})
 
 @socketio.on('message')
 def handle_message(message):
