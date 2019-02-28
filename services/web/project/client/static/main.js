@@ -1,6 +1,10 @@
 $( document ).ready(() => {
   console.log('Sanity Check!');
-
+  var ws = new WebSocket('ws://' + document.domain + ':' + location.port + '/ws');
+  ws.onmessage = function (event) {
+      console.log(event.data);
+  };
+  ws.send('bob');
 });
 
 $('#start-sockets').on('click', () => {

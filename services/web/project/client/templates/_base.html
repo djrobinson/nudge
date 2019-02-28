@@ -7,21 +7,7 @@
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <link href="{{url_for('static', filename='main.css')}}" rel="stylesheet" media="screen">
     {% block css %}{% endblock %}
-    <title>Flask + Spark + Docker</title>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
-    <script type="text/javascript" charset="utf-8">
-        var socket = io.connect('http://' + document.domain + ':5009');
-        console.log("Do we have a socket: ", socket)
-
-        socket.on('connect', function() {
-            console.log("Socket is connected")
-            socket.emit('my event', {data: 'I\'m connected!'});
-        });
-
-        socket.on('message', function(msg) {
-            console.log("Message from server: ", msg)
-        })
-    </script>
+    <title>WiP</title>
   </head>
   <body>
     <div class="container">

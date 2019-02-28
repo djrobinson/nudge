@@ -83,9 +83,10 @@ services:
     volumes:
       - './services/web/project:/usr/src/app'
     ports:
-      - 5009:5000
-    command: python -u manage.py runserver -h 0.0.0.0
+      - 5000:5000
+    command: python -u manage.py
     environment:
+      - QUART_APP=manage:app
       - APP_SETTINGS=server.config.DevelopmentConfig
       - PYTHONUNBUFFERED=0
     links:

@@ -1,71 +1,43 @@
 # manage.py
-import eventlet
-eventlet.monkey_patch()
+from dotenv import load_dotenv
+load_dotenv()
 
-from flask_script import Manager, Command, Server as _Server, Option
+import os
 
-from server import create_app, socketio
+from quart import Quart, websocket, render_template, jsonify
 
+app_settings = os.getenv(
+    'APP_SETTINGS',
+    'project.server.config.DevelopmentConfig'
+)
+app = Quart(
+    __name__,
+    template_folder='./client/templates',
+    static_folder='./client/static'
+)
+is_debug = True
+print("Configuring App")
+app.config.from_object(app_settings)
 
-manager = Manager(create_app)
+from server.api.views import main_blueprint
+app.register_blueprint(main_blueprint)
 
-class Server(_Server):
-    help = description = 'Runs the Socket.IO web server'
-
-    def get_options(self):
-        options = (
-            Option('-h', '--host',
-                   dest='host',
-                   default=self.host),
-
-            Option('-p', '--port',
-                   dest='port',
-                   type=int,
-                   default=self.port),
-
-            Option('-d', '--debug',
-                   action='store_true',
-                   dest='use_debugger',
-                   help=('enable the Werkzeug debugger (DO NOT use in '
-                         'production code)'),
-                   default=self.use_debugger),
-            Option('-D', '--no-debug',
-                   action='store_false',
-                   dest='use_debugger',
-                   help='disable the Werkzeug debugger',
-                   default=self.use_debugger),
-
-            Option('-r', '--reload',
-                   action='store_true',
-                   dest='use_reloader',
-                   help=('monitor Python files for changes (not 100%% safe '
-                         'for production use)'),
-                   default=self.use_reloader),
-            Option('-R', '--no-reload',
-                   action='store_false',
-                   dest='use_reloader',
-                   help='do not monitor Python files for changes',
-                   default=self.use_reloader),
-        )
-        return options
-
-    def __call__(self, app, host, port, use_debugger, use_reloader):
-        # override the default runserver command to start a Socket.IO server
-        if use_debugger is None:
-            use_debugger = app.debug
-            if use_debugger is None:
-                use_debugger = True
-        if use_reloader is None:
-            use_reloader = app.debug
-        socketio.run(app,
-                     host=host,
-                     port=port,
-                     debug=use_debugger,
-                     use_reloader=use_reloader,
-                     **self.server_options)
+@app.websocket('/ws')
+async def ws():
+    while True:
+        data = await websocket.receive()
+        await websocket.send(f"echo {data}")
 
 
-manager.add_command('runserver', Server())
+@app.route('/', methods=['GET'])
+def home():
+    return jsonify({'hello': 'index'})
+
+
+def run_web_app():
+    app.run(debug=is_debug)
+
 
 if __name__ == '__main__':
-    manager.run()
+    run_web_app()
+
