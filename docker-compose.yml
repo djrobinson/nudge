@@ -73,25 +73,24 @@ services:
       - spark-master
     depends_on:
       - spark-master
-
-  web:
-    container_name: web
-    image: web
+  quart-app:
+    restart: always
+    image: quart-app
     build:
-      context: ./services/web
-      dockerfile: Dockerfile
-    volumes:
-      - './services/web/project:/usr/src/app'
+      context: ./services
+      dockerfile: quart_app/Dockerfile
     ports:
-      - 5000:5000
-    command: python -u manage.py
-    environment:
-      - QUART_APP=manage:app
-      - APP_SETTINGS=server.config.DevelopmentConfig
-      - PYTHONUNBUFFERED=0
+      - "9000:9000"
+    env_file:
+      - .env
+  quart-nginx:
+    image: quart-nginx
+    build:
+      context: ./services
+      dockerfile: nginx/Dockerfile
+    ports:
+      - "80:80"
     links:
-      - spark-master
-      - spark-worker
+      - quart-app
     depends_on:
-      - spark-master
-      - spark-worker
+      - quart-app
