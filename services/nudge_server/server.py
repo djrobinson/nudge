@@ -1,4 +1,4 @@
-from quart import Quart
+from quart import Quart, websocket
 
 app = Quart(__name__)
 

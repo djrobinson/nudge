@@ -44,7 +44,6 @@ services:
     volumes:
       - ./services/spark/conf/master:/conf
       - ./services/spark/data:/tmp/data
-
   spark-worker:
     image: spark
     container_name: spark-worker
@@ -73,17 +72,29 @@ services:
       - spark-master
     depends_on:
       - spark-master
-  nudge-app:
+  nudge-server:
     restart: always
-    image: nudge-app
+    image: nudge-server
     build:
-      context: ./services/nudge_app
+      context: ./services/nudge_server
       dockerfile: Dockerfile
     ports:
       - "9000:9000"
     command: hypercorn -b 0.0.0.0 server:app
     env_file:
       - .env
+  nudge-client:
+    image: nudge-client
+    build:
+      context: ./services/nudge_client
+      dockerfile: Dockerfile
+    volumes:
+      - './services/nudge_client:/usr/src/app'
+      - '/usr/src/app/node_modules'
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=development
   quart-nginx:
     image: quart-nginx
     build:
@@ -92,6 +103,6 @@ services:
     ports:
       - "80:80"
     links:
-      - nudge-app
+      - nudge-server
     depends_on:
-      - nudge-app
+      - nudge-server
