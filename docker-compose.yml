@@ -77,10 +77,11 @@ services:
     restart: always
     image: quart-app
     build:
-      context: ./services
-      dockerfile: quart_app/Dockerfile
+      context: ./services/quart_app
+      dockerfile: Dockerfile
     ports:
       - "9000:9000"
+    command: hypercorn -b 0.0.0.0 server:app
     env_file:
       - .env
   quart-nginx:

@@ -5,7 +5,7 @@ app = Quart(__name__)
 
 @app.route('/')
 async def index():
-    return '<h1>I got worms</h1>'
+    return '<h1>Howdy</h1>'
 
 
 @app.route('/up')
