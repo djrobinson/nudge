@@ -73,11 +73,11 @@ services:
       - spark-master
     depends_on:
       - spark-master
-  quart-app:
+  nudge-app:
     restart: always
-    image: quart-app
+    image: nudge-app
     build:
-      context: ./services/quart_app
+      context: ./services/nudge_app
       dockerfile: Dockerfile
     ports:
       - "9000:9000"
@@ -92,6 +92,6 @@ services:
     ports:
       - "80:80"
     links:
-      - quart-app
+      - nudge-app
     depends_on:
-      - quart-app
+      - nudge-app
