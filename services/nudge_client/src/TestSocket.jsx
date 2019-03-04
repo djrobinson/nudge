@@ -1,5 +1,4 @@
 import React from 'react';
-import Websocket from 'react-websocket';
 
 class TestSocket extends React.Component {
 
@@ -10,18 +9,32 @@ class TestSocket extends React.Component {
     };
   }
 
-  handleData(data) {
-    let result = JSON.parse(data);
-    this.setState({count: this.state.count + result.movement});
+  async componentDidMount() {
+    var response = await fetch("http://localhost:9000/");
+    var body = await response.json();
+    console.log("What is body: ", body)
+    this.ws = new WebSocket('ws://localhost:9000/ws')
+    this.initWebSocket()
   }
+
+  initWebSocket() {
+    this.ws.onopen = event => {
+      console.log("Open WS")
+      this.ws.send("haldo")
+    }
+    this.ws.onmessage = event => {
+      console.log("Message WS")
+      let data = JSON.parse(event.data)
+      console.log("What is data: ", data)
+    }
+  }
+
 
   render() {
     return (
       <div>
+        <h1>Halasdfsddo</h1>
         Count: <strong>{this.state.count}</strong>
-
-        <Websocket url='ws://localhost:8888/ws/'
-            onMessage={this.handleData.bind(this)}/>
       </div>
     );
   }

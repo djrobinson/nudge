@@ -7,3 +7,4 @@ python-binance==0.7.1
 kafka-python==1.4.4
 faust[eventlet]==1.4.6
 eventlet==0.24.1
+quart-cors==0.1.2
