@@ -21,6 +21,7 @@ async def ws():
     logging.info("Websocket called")
     while True:
         data = await websocket.receive()
+        logging.info('What is data: ', data)
         await websocket.send(f"echo {data}")
 
 

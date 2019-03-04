@@ -20,7 +20,7 @@ class TestSocket extends React.Component {
   initWebSocket() {
     this.ws.onopen = event => {
       console.log("Open WS")
-      this.ws.send("haldo")
+      this.ws.send("test")
     }
     this.ws.onmessage = event => {
       console.log("Message WS")
