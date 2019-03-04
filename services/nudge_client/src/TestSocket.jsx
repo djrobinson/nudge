@@ -13,8 +13,10 @@ class TestSocket extends React.Component {
     var response = await fetch("http://localhost:9000/");
     var body = await response.json();
     console.log("What is body: ", body)
-    this.ws = new WebSocket('ws://localhost:9000/ws/faust')
-    await this.initWebSocket()
+    var es = new EventSource('http://localhost:9000/sse');
+    es.onmessage = event => {
+      console.log("What is ES event? ", event)
+    }
   }
 
   async initWebSocket() {
