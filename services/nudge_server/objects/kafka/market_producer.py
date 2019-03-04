@@ -3,7 +3,7 @@
 
 from kafka import KafkaProducer
 import json
-from server.log.log import getLogger
+from log.log import getLogger
 
 class MarketProducer(object):
 

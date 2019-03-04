@@ -3,7 +3,7 @@
 
 from kafka import KafkaConsumer
 from kafka import TopicPartition
-from server.log.log import getLogger
+from log.log import getLogger
 import json
 import faust
 
@@ -51,8 +51,7 @@ class MarketConsumer(object):
                 list.append(json.loads(message.value))
         return list
 
-    def test_faust(self):
-        print('Testing Faust')
+    async def test_faust(self):
         app = faust.App(
             'nudgeapp',
             broker=self.kafka_brokers,

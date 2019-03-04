@@ -2,8 +2,8 @@ import websocket
 import json
 import _thread
 
-from server.sockets.base_socket import BaseSocket
-from server.enums.poloniex_market_lookup import PoloniexMarketLookup
+from sockets.base_socket import BaseSocket
+from enums.poloniex_market_lookup import PoloniexMarketLookup
 
 
 class PoloniexWS(BaseSocket):

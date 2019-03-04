@@ -13,19 +13,27 @@ class TestSocket extends React.Component {
     var response = await fetch("http://localhost:9000/");
     var body = await response.json();
     console.log("What is body: ", body)
-    this.ws = new WebSocket('ws://localhost:9000/ws')
-    this.initWebSocket()
+    this.ws = new WebSocket('ws://localhost:9000/ws/faust')
+    await this.initWebSocket()
   }
 
-  initWebSocket() {
+  async initWebSocket() {
+    console.log("Initing ws")
     this.ws.onopen = event => {
       console.log("Open WS")
       this.ws.send("test")
     }
     this.ws.onmessage = event => {
       console.log("Message WS")
-      let data = JSON.parse(event.data)
-      console.log("What is data: ", data)
+      console.log("What is data: ", event)
+    }
+  }
+
+  async startWebSocket() {
+    console.log("Calling start ws")
+    const faust_ws = new WebSocket('ws://localhost:9000/ws/start')
+    faust_ws.onopen = event => {
+      console.log("Faust WS open")
     }
   }
 
@@ -35,6 +43,7 @@ class TestSocket extends React.Component {
       <div>
         <h1>Halasdfsddo</h1>
         Count: <strong>{this.state.count}</strong>
+        <button onClick={()=> this.startWebSocket()}>Start WS</button>
       </div>
     );
   }
