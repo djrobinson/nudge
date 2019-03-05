@@ -1,5 +1,8 @@
+import os
 import logging
 import datetime
+
+os.environ.setdefault('FAUST_LOOP', 'eventlet')
 
 import faust
 import asyncio
@@ -122,7 +125,9 @@ class ServerSentEvent:
 
 faust_app = faust.App(
     'TestMeister',
-    broker='kafka://host.docker.internal:9092'
+    broker='kafka://localhost:9092',
+    autodiscover=True,
+    
 )
 topic = faust_app.topic(
     'TestMeister'
@@ -134,12 +139,10 @@ async def testmeister(messages):
     async for msg in messages:
         print(msg)
         for queue in app.clients:
-            await queue.put(msg)
+            yield queue.put(msg)
 
 
 if __name__ == "__main__":
     logging.debug("Starting appp")
-
-
     app.run()
     faust_app.main()
