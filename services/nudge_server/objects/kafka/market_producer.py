@@ -18,7 +18,7 @@ class MarketProducer(object):
                 bootstrap_servers=kafka_brokers
             )
         except Exception as e:
-            self.logger.error("Error in Instantiating kafka producer")
+            self.logger.error("Error in Instantiating kafka producer: %s" % e)
 
     """Streaming the input message to the Kafka topic through kafka producer."""
     def send_transaction_data(self, json_data, kafka_topic_name):

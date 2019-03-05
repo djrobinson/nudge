@@ -2,8 +2,6 @@ import os
 import logging
 import datetime
 
-os.environ.setdefault('FAUST_LOOP', 'eventlet')
-
 import faust
 import asyncio
 
@@ -124,13 +122,13 @@ class ServerSentEvent:
 
 
 faust_app = faust.App(
-    'TestMeister',
+    'testtopic1',
     broker='kafka://localhost:9092',
-    autodiscover=True,
-    
+    autodiscover=['server'],
+
 )
 topic = faust_app.topic(
-    'TestMeister'
+    'testtopic1'
 )
 
 @faust_app.agent(topic)

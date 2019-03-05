@@ -10,9 +10,11 @@ services:
     ports:
       - "9092:9092"
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ADVERTISED_HOST_NAME: localhost
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181/kafka
-      KAFKA_CREATE_TOPICS: "TestMeister:1:1"
+      KAFKA_CREATE_TOPICS: "testtopic1:1:1"
+    links:
+      - zookeeper:zk
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
   nudge-server:
