@@ -29,22 +29,12 @@ async def broadcast():
         await queue.put(data['message'])
     return jsonify(True)
 
+
+
+
 @app.route('/sse')
 async def sse():
-    # loop = asyncio.get_event_loop()
-    # faust_app = faust.App(
-    #     'TestMeister',
-    #     broker='kafka:9092',
-    #     loop=loop
-    # )
-    # topic = faust_app.topic(
-    #     'TestMeister',
-    #     loop=loop
-    # )
-    # faust_app.start()
-    #
-    #
-    #
+
     # async def mystream():
     #     async for data in topic.stream():
     #         print(f'Received: {data!r}')
@@ -90,7 +80,7 @@ async def ws():
 async def faust_ws():
     while True:
         faust_app = faust.App(
-            'nudgeapp',
+            'TestMeister',
             broker='kafka:9092',
             value_serializer='raw',
         )
@@ -130,7 +120,26 @@ class ServerSentEvent:
         return message.encode('utf-8')
 
 
+faust_app = faust.App(
+    'TestMeister',
+    broker='kafka://host.docker.internal:9092'
+)
+topic = faust_app.topic(
+    'TestMeister'
+)
+
+@faust_app.agent(topic)
+async def testmeister(messages):
+    print('Faust cb is called')
+    async for msg in messages:
+        print(msg)
+        for queue in app.clients:
+            await queue.put(msg)
+
+
 if __name__ == "__main__":
     logging.debug("Starting appp")
 
+
     app.run()
+    faust_app.main()
