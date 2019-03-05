@@ -40,7 +40,6 @@ class PoloniexWS(BaseSocket):
         _thread.start_new_thread(run, ())
 
     def market_parse_message(self, message):
-        print("Parsing market message")
         if message[0] in self.open_channels:
             print("Start parse ", message)
 

@@ -13,6 +13,7 @@ class BaseSocket:
         # print(message)
         # maybe log original message?
         parsed_message = self.market_parse_message(message)
+        print(f'Adding message to TestMeister {message}')
         self.producer.send_transaction_data(message, 'TestMeister')
 
     def on_error(self, error):

@@ -9,12 +9,10 @@ from quart_cors import cors
 
 from sockets.exchanges.poloniex_socket import PoloniexWS
 
-
 app = Quart(__name__)
 app = cors(app)
 
 app.clients = set()
-
 
 @app.route('/')
 async def index():
@@ -22,22 +20,45 @@ async def index():
     return jsonify([1, 2])
 
 
+@app.route('/', methods=['POST'])
+async def broadcast():
+    data = {
+        'message': "test"
+    }
+    for queue in app.clients:
+        await queue.put(data['message'])
+    return jsonify(True)
+
 @app.route('/sse')
 async def sse():
-    faust_app = faust.App(
-        'TestMeister',
-        broker='kafka:9092'
-    )
-    topic = faust_app.topic('TestMeister')
-    await faust_app.start()
+    # loop = asyncio.get_event_loop()
+    # faust_app = faust.App(
+    #     'TestMeister',
+    #     broker='kafka:9092',
+    #     loop=loop
+    # )
+    # topic = faust_app.topic(
+    #     'TestMeister',
+    #     loop=loop
+    # )
+    # faust_app.start()
+    #
+    #
+    #
+    # async def mystream():
+    #     async for data in topic.stream():
+    #         print(f'Received: {data!r}')
+    #         event = ServerSentEvent(data)
+    #         yield event.encode()
 
-    @asyncio.coroutine
+    queue = asyncio.Queue()
+    app.clients.add(queue)
+
     async def send_events():
-        async for event in topic.stream():
+        while True:
+            data = await queue.get()
+            event = ServerSentEvent(data)
             yield event.encode()
-
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(send_events())
 
     response = await make_response(
         send_events(),
@@ -47,10 +68,10 @@ async def sse():
             'Transfer-Encoding': 'chunked',
         },
     )
-
-
     response.timeout = None
     return response
+
+
 
 
 @app.route('/up')
@@ -82,9 +103,6 @@ async def faust_ws():
                 await websocket.send(f"MESSAGES: {msg}")
 
 
-
-
-
 @app.websocket('/ws/start')
 async def start_websocket():
     print("Starting")
@@ -114,4 +132,5 @@ class ServerSentEvent:
 
 if __name__ == "__main__":
     logging.debug("Starting appp")
+
     app.run()
