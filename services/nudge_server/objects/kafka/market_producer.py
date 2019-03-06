@@ -22,6 +22,7 @@ class MarketProducer(object):
 
     """Streaming the input message to the Kafka topic through kafka producer."""
     def send_transaction_data(self, json_data, kafka_topic_name):
+        print("Sending transaction data: %s " % json_data)
         self.producer.send(kafka_topic_name, json_data)
         self.producer.flush()
 

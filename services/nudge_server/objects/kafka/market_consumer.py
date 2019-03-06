@@ -34,7 +34,7 @@ class MarketConsumer(object):
     message value and key are raw bytes -- decode if necessary!
     e.g., for unicode: `message.value.decode('utf-8')`
     """
-    def consume_all_messages(self):
+    async def consume_all_messages(self):
         self.consumer.seek_to_end()
         end = self.consumer.position(self.partition) - 1
         self.consumer.seek_to_beginning()

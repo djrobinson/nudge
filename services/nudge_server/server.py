@@ -1,4 +1,6 @@
 import os
+
+import json
 import logging
 import datetime
 
@@ -8,12 +10,33 @@ import asyncio
 from quart import Quart, websocket, jsonify, make_response
 from quart_cors import cors
 
+from objects.kafka.market_consumer import MarketConsumer
 from sockets.exchanges.poloniex_socket import PoloniexWS
 
 app = Quart(__name__)
 app = cors(app)
 
 app.clients = set()
+
+faust_app = faust.App(
+    'testtopic1',
+    broker='aiokafka://kafka:9092',
+    autodiscover=True
+
+)
+topic = faust_app.topic(
+    'testtopic1'
+)
+
+
+@faust_app.agent(topic)
+async def testmeister(messages):
+    print('Faust cb is called')
+    async for msg in messages:
+        print(msg)
+        for queue in app.clients:
+            await queue.put(msg)
+
 
 @app.route('/')
 async def index():
@@ -29,9 +52,6 @@ async def broadcast():
     for queue in app.clients:
         await queue.put(data['message'])
     return jsonify(True)
-
-
-
 
 @app.route('/sse')
 async def sse():
@@ -63,35 +83,25 @@ async def sse():
     return response
 
 
+@app.route('/show_transactions')
+async def show_transactions():
+    api_call_time = datetime.datetime.now()
+    api_call_time = api_call_time.strftime("%Y-%m-%d %H:%M:%S")
+    print("show_transactions API request made at " + api_call_time)
+    market = MarketConsumer('kafka:9092', 'testtopic1')
+    transaction_list = await market.consume_all_messages()
+    if len(transaction_list) == 0:
+        return "Kafka Topic is empty"
+    a = []
+    for i in transaction_list:
+        a.append(json.loads(i))
+    transactions = a
+    return jsonify(transactions)
 
 
 @app.route('/up')
 async def up():
     return 'Up'
-
-@app.websocket('/ws')
-async def ws():
-    logging.info("Websocket called")
-    while True:
-        data = await websocket.receive()
-        logging.debug('What is data: ', data)
-        await websocket.send(f"echo {data}")
-
-@app.websocket('/ws/faust')
-async def faust_ws():
-    while True:
-        faust_app = faust.App(
-            'TestMeister',
-            broker='kafka:9092',
-            value_serializer='raw',
-        )
-
-        test_topic = faust_app.topic('TestMeister')
-
-        @faust_app.agent(test_topic)
-        async def testing_faust_stream(messages):
-            async for msg in messages:
-                await websocket.send(f"MESSAGES: {msg}")
 
 
 @app.websocket('/ws/start')
@@ -119,26 +129,6 @@ class ServerSentEvent:
             message = f"{message}\nevent: {self.event}"
         message = f"{message}\r\n\r\n"
         return message.encode('utf-8')
-
-
-faust_app = faust.App(
-    'testtopic1',
-    broker='kafka://localhost:9092',
-    autodiscover=['server'],
-
-)
-topic = faust_app.topic(
-    'testtopic1'
-)
-
-@faust_app.agent(topic)
-async def testmeister(messages):
-    print('Faust cb is called')
-    async for msg in messages:
-        print(msg)
-        for queue in app.clients:
-            yield queue.put(msg)
-
 
 if __name__ == "__main__":
     logging.debug("Starting appp")
