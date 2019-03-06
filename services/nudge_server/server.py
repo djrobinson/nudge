@@ -37,24 +37,9 @@ async def index(web, request):
         'test':'howdy'
     })
 
-#
-# @app.page('/', methods=['POST'])
-# async def broadcast():
-#     data = {
-#         'message': "test"
-#     }
-#     for queue in app.clients:
-#         await queue.put(data['message'])
-#     return True
 
 @app.page('/sse')
 async def sse(web, request):
-
-    # async def mystream():
-    #     async for data in topic.stream():
-    #         print(f'Received: {data!r}')
-    #         event = ServerSentEvent(data)
-    #         yield event.encode()
 
     queue = asyncio.Queue()
     app.clients.add(queue)
@@ -92,18 +77,13 @@ async def sse(web, request):
 #     transactions = a
 #     return jsonify(transactions)
 
-#
-# @app.route('/up')
-# async def up():
-#     return 'Up'
-#
-#
-# @app.websocket('/ws/start')
-# async def start_websocket():
-#     print("Starting")
-#     socket_manager = PoloniexWS()
-#     socket_manager.start_ws()
-#     return await jsonify({ "response": True })
+
+@app.page('/ws/start')
+async def start_websocket(web, request):
+    print("Starting")
+    socket_manager = PoloniexWS()
+    socket_manager.start_ws()
+    return await web.json({ "response": True })
 
 
 class ServerSentEvent:
@@ -123,6 +103,7 @@ class ServerSentEvent:
             message = f"{message}\nevent: {self.event}"
         message = f"{message}\r\n\r\n"
         return message.encode('utf-8')
+
 
 if __name__ == "__main__":
     logging.debug("Starting appp")

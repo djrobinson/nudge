@@ -10,10 +10,10 @@ class TestSocket extends React.Component {
   }
 
   async componentDidMount() {
-    var response = await fetch("http://localhost:9000/");
+    var response = await fetch("http://localhost:6066/home");
     var body = await response.json();
     console.log("What is body: ", body)
-    var es = new EventSource('http://localhost:9000/sse');
+    var es = new EventSource('http://localhost:6066/sse');
     es.onmessage = event => {
       console.log("What is ES event? ", event)
     }
@@ -33,10 +33,9 @@ class TestSocket extends React.Component {
 
   async startWebSocket() {
     console.log("Calling start ws")
-    const faust_ws = new WebSocket('ws://localhost:9000/ws/start')
-    faust_ws.onopen = event => {
-      console.log("Faust WS open")
-    }
+    var response = await fetch("http://localhost:6066/ws/start");
+    var body = await response.json();
+    console.log("What is start ws: ", body)
   }
 
 
