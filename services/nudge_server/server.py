@@ -7,6 +7,8 @@ import datetime
 import faust
 import asyncio
 
+import aiohttp_cors
+
 from objects.kafka.market_consumer import MarketConsumer
 from sockets.exchanges.poloniex_socket import PoloniexWS
 
@@ -18,8 +20,9 @@ app = faust.App(
 topic = app.topic(
     'testtopic1'
 )
-app.clients = set()
 
+cors = aiohttp_cors.setup(app)
+app.clients = set()
 
 @app.agent(topic)
 async def testmeister(messages):
@@ -85,6 +88,18 @@ async def start_websocket(web, request):
     socket_manager.start_ws()
     return await web.json({ "response": True })
 
+
+resource = cors.add(app.router.add_resource("/home"))
+
+route = cors.add(
+    resource.add_route("GET", index), {
+        "*": aiohttp_cors.ResourceOptions(
+            allow_credentials=True,
+            expose_headers=("X-Custom-Server-Header",),
+            allow_headers=("X-Requested-With", "Content-Type"),
+            max_age=3600,
+        )
+    })
 
 class ServerSentEvent:
 
