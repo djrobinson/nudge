@@ -2,11 +2,14 @@ import os
 
 import json
 import logging
-import datetime
 
 import faust
 import asyncio
 import codecs
+
+from datetime import datetime
+
+from aiohttp_sse import sse_response
 
 from objects.kafka.market_consumer import MarketConsumer
 from sockets.exchanges.poloniex_socket import PoloniexWS
@@ -50,25 +53,20 @@ async def example(web, request):
 @app.page('/sse')
 async def sse(web, request):
 
-    queue = asyncio.Queue()
-    app.clients.add(queue)
+    # queue = asyncio.Queue()
+    # app.clients.add(queue)
+    loop = request.app.loop
 
-    async def send_events():
+    async with sse_response(request) as resp:
         while True:
-            data = await queue.get()
-            event = ServerSentEvent(data)
-            yield event.encode()
+            # data = await queue.get()
+            # event = ServerSentEvent(data)
+            data = 'Server Time : {}'.format(datetime.now())
+            print(data)
+            await resp.send(data)
+            await asyncio.sleep(1, loop)
 
-    response = await web.json(
-        send_events(),
-        {
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Transfer-Encoding': 'chunked',
-        },
-    )
-    response.timeout = None
-    return response
+    return resp
 
 
 # @app.route('/show_transactions')
