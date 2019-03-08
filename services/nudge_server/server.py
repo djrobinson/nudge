@@ -53,18 +53,15 @@ async def example(web, request):
 @app.page('/sse')
 async def sse(web, request):
 
-    # queue = asyncio.Queue()
-    # app.clients.add(queue)
-    loop = request.app.loop
+    queue = asyncio.Queue()
+    app.clients.add(queue)
 
     async with sse_response(request) as resp:
         while True:
-            # data = await queue.get()
-            # event = ServerSentEvent(data)
-            data = 'Server Time : {}'.format(datetime.now())
-            print(data)
+            data = await queue.get()
+            event = ServerSentEvent(data)
+            print("Event-o %s" % event)
             await resp.send(data)
-            await asyncio.sleep(1, loop)
 
     return resp
 

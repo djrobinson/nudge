@@ -5,6 +5,9 @@
     <title>Title</title>
     <script>
         console.log("Sanity Check")
+        fetch("http://localhost:6066/ws/start")
+            .then(data => { return data.json() })
+            .then(res=> {console.log("WS Start: ", res)})
         var es = new EventSource('http://localhost:6066/sse');
         es.onmessage = event => {
           console.log("What is ES event? ", event)
