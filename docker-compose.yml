@@ -23,21 +23,13 @@ services:
     build:
       context: ./services/nudge_server
       dockerfile: Dockerfile
+    volumes:
+      - './services/nudge_server/nudge_client:/usr/src/app'
+      - '/usr/src/app/node_modules'
     ports:
       - "6066:6066"
     environment:
       - PYTHONUNBUFFERED=0
+      - NODE_ENV=development
     env_file:
       - .env
-  nudge-client:
-    image: nudge-client
-    build:
-      context: ./services/nudge_client
-      dockerfile: Dockerfile
-    volumes:
-      - './services/nudge_client:/usr/src/app'
-      - '/usr/src/app/node_modules'
-    ports:
-      - '3000:3000'
-    environment:
-      - NODE_ENV=development
