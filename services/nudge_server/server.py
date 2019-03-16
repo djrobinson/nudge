@@ -35,13 +35,11 @@ async def testmeister(messages):
             await queue.put(msg)
 
 
-@app.page('/home')
+@app.page('/')
 async def index(web, request):
-    print(f'Here da request: {request}')
-    return web.json({
-        'test':'howdy'
-    })
-
+    f = codecs.open("nudge_client/public/index.html", 'r', 'utf-8')
+    f_text = f.read()
+    return web.html(f_text)
 
 @app.page('/example')
 async def example(web, request):
