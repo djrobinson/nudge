@@ -46,6 +46,17 @@ async def example(web, request):
 
 @app.page('/sse')
 async def sse(web, request):
+    cors = aiohttp_cors.setup(web.web.app)
+    resource = cors.add(app.router.add_resource("/test"))
+    route = cors.add(
+        resource.add_route("GET", test), {
+            "*": aiohttp_cors.ResourceOptions(
+                allow_credentials=True,
+                expose_headers=("X-Custom-Server-Header",),
+                allow_headers=("X-Requested-With", "Content-Type"),
+                max_age=3600,
+            )
+        })
 
     queue = asyncio.Queue()
     app.clients.add(queue)
@@ -107,7 +118,7 @@ class ServerSentEvent:
 
 @app.page('/test')
 async def test(web, request):
-    cors = aiohttp_cors.setup(web.web_app)
+    cors = aiohttp_cors.setup(web.web.app)
     resource = cors.add(app.router.add_resource("/test"))
     route = cors.add(
         resource.add_route("GET", test), {
