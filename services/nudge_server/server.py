@@ -7,8 +7,8 @@ import faust
 import asyncio
 import codecs
 
-from faust.web.drivers.aiohttp import Web
 from datetime import datetime
+from aiohttp import web
 
 from aiohttp_sse import sse_response
 
@@ -44,31 +44,6 @@ async def example(web, request):
     f_text = f.read()
     return web.html(f_text)
 
-@app.page('/sse')
-async def sse(web, request):
-    cors = aiohttp_cors.setup(web.web.app)
-    resource = cors.add(app.router.add_resource("/test"))
-    route = cors.add(
-        resource.add_route("GET", test), {
-            "*": aiohttp_cors.ResourceOptions(
-                allow_credentials=True,
-                expose_headers=("X-Custom-Server-Header",),
-                allow_headers=("X-Requested-With", "Content-Type"),
-                max_age=3600,
-            )
-        })
-
-    queue = asyncio.Queue()
-    app.clients.add(queue)
-
-    async with sse_response(request) as resp:
-        while True:
-            data = await queue.get()
-            event = ServerSentEvent(data)
-            print("Event-o %s" % event)
-            await resp.send(data)
-
-    return resp
 
 
 # @app.route('/show_transactions')
@@ -114,22 +89,48 @@ class ServerSentEvent:
         return message.encode('utf-8')
 
 
+async def test(request):
+    return web.Response(text="haldo")
 
 
-@app.page('/test')
-async def test(web, request):
-    cors = aiohttp_cors.setup(web.web.app)
-    resource = cors.add(app.router.add_resource("/test"))
-    route = cors.add(
-        resource.add_route("GET", test), {
-            "*": aiohttp_cors.ResourceOptions(
-                allow_credentials=True,
-                expose_headers=("X-Custom-Server-Header",),
-                allow_headers=("X-Requested-With", "Content-Type"),
-                max_age=3600,
-            )
-        })
-    return "test"
+async def sse(request):
+    queue = asyncio.Queue()
+    app.clients.add(queue)
+
+    async with sse_response(request) as resp:
+        while True:
+            data = await queue.get()
+            event = ServerSentEvent(data)
+            print("Event-o %s" % event)
+            await resp.send(data)
+
+    return web.Response(resp)
+
+aiohttp_app = app.web.web_app
+cors = aiohttp_cors.setup(aiohttp_app)
+resource = cors.add(aiohttp_app.router.add_resource("/test"))
+cors.add(
+    resource.add_route("GET", test), {
+        "*": aiohttp_cors.ResourceOptions(
+            allow_credentials=True,
+            expose_headers=("X-Custom-Server-Header",),
+            allow_headers=("X-Requested-With", "Content-Type"),
+            max_age=3600,
+        )
+    })
+
+sse_resource = cors.add(aiohttp_app.router.add_resource("/sse"))
+cors.add(
+    sse_resource.add_route("GET", sse), {
+        "*": aiohttp_cors.ResourceOptions(
+            allow_credentials=True,
+            expose_headers=("X-Custom-Server-Header",),
+            allow_headers=("X-Requested-With", "Content-Type"),
+            max_age=3600,
+        )
+    })
+
+
 
 
 if __name__ == "__main__":
