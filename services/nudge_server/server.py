@@ -11,6 +11,8 @@ from datetime import datetime
 
 from aiohttp_sse import sse_response
 
+import aiohttp_cors
+
 from objects.kafka.market_consumer import MarketConsumer
 from sockets.exchanges.poloniex_socket import PoloniexWS
 
@@ -46,7 +48,6 @@ async def example(web, request):
     f = codecs.open("templates/index.html", 'r', 'utf-8')
     f_text = f.read()
     return web.html(f_text)
-
 
 @app.page('/sse')
 async def sse(web, request):
@@ -105,6 +106,23 @@ class ServerSentEvent:
             message = f"{message}\nevent: {self.event}"
         message = f"{message}\r\n\r\n"
         return message.encode('utf-8')
+
+
+cors = aiohttp_cors.setup(app)
+
+async def test(web, request):
+    return "haldo"
+
+resource = cors.add(app.router.add_resource("/test"))
+route = cors.add(
+    resource.add_route("GET", test), {
+        "http://client.example.org": aiohttp_cors.ResourceOptions(
+            allow_credentials=True,
+            expose_headers=("X-Custom-Server-Header",),
+            allow_headers=("X-Requested-With", "Content-Type"),
+            max_age=3600,
+        )
+    })
 
 
 if __name__ == "__main__":
