@@ -10,7 +10,7 @@ class TestSocket extends React.Component {
   }
 
   async componentDidMount() {
-    var response = await fetch("http://localhost:6066/home");
+    var response = await fetch("http://localhost:6066/test");
     var body = await response.json();
     console.log("What is body: ", body)
     var es = new EventSource('http://localhost:6066/sse');

@@ -7,6 +7,7 @@ import faust
 import asyncio
 import codecs
 
+from faust.web.drivers.aiohttp import Web
 from datetime import datetime
 
 from aiohttp_sse import sse_response
@@ -36,12 +37,6 @@ async def testmeister(messages):
         for queue in app.clients:
             await queue.put(msg)
 
-
-@app.page('/')
-async def index(web, request):
-    f = codecs.open("nudge_client/build/index.html", 'r', 'utf-8')
-    f_text = f.read()
-    return web.html(f_text)
 
 @app.page('/example')
 async def example(web, request):
@@ -108,21 +103,22 @@ class ServerSentEvent:
         return message.encode('utf-8')
 
 
-cors = aiohttp_cors.setup(app)
 
+
+@app.page('/test')
 async def test(web, request):
-    return "haldo"
-
-resource = cors.add(app.router.add_resource("/test"))
-route = cors.add(
-    resource.add_route("GET", test), {
-        "http://client.example.org": aiohttp_cors.ResourceOptions(
-            allow_credentials=True,
-            expose_headers=("X-Custom-Server-Header",),
-            allow_headers=("X-Requested-With", "Content-Type"),
-            max_age=3600,
-        )
-    })
+    cors = aiohttp_cors.setup(web.web_app)
+    resource = cors.add(app.router.add_resource("/test"))
+    route = cors.add(
+        resource.add_route("GET", test), {
+            "*": aiohttp_cors.ResourceOptions(
+                allow_credentials=True,
+                expose_headers=("X-Custom-Server-Header",),
+                allow_headers=("X-Requested-With", "Content-Type"),
+                max_age=3600,
+            )
+        })
+    return "test"
 
 
 if __name__ == "__main__":
