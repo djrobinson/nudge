@@ -37,7 +37,7 @@ async def testmeister(messages):
 
 @app.page('/')
 async def index(web, request):
-    f = codecs.open("nudge_client/public/index.html", 'r', 'utf-8')
+    f = codecs.open("nudge_client/build/index.html", 'r', 'utf-8')
     f_text = f.read()
     return web.html(f_text)
 
