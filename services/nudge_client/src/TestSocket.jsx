@@ -13,7 +13,7 @@ class TestSocket extends React.Component {
     var response = await fetch("http://localhost:6066/test");
     var body = await response.text();
     console.log("What is body: ", body)
-    var es = new EventSource('http://localhost:6066/sse');
+    var es = new EventSource('http://localhost:6066/sse', {withCredentials: true});
     es.onmessage = event => {
       console.log("What is ES event? ", event)
     }

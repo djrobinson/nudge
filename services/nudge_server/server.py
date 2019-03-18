@@ -45,23 +45,6 @@ async def example(web, request):
     return web.html(f_text)
 
 
-
-# @app.route('/show_transactions')
-# async def show_transactions():
-#     api_call_time = datetime.datetime.now()
-#     api_call_time = api_call_time.strftime("%Y-%m-%d %H:%M:%S")
-#     print("show_transactions API request made at " + api_call_time)
-#     market = MarketConsumer('kafka:9092', 'testtopic1')
-#     transaction_list = await market.consume_all_messages()
-#     if len(transaction_list) == 0:
-#         return "Kafka Topic is empty"
-#     a = []
-#     for i in transaction_list:
-#         a.append(json.loads(i))
-#     transactions = a
-#     return jsonify(transactions)
-
-
 @app.page('/ws/start')
 async def start_websocket(web, request):
     print("Starting")
@@ -97,6 +80,8 @@ async def sse(request):
     queue = asyncio.Queue()
     app.clients.add(queue)
 
+    print("Calling SSE!!!!!!!!!!!!!!!!!!!!!!")
+
     async with sse_response(request) as resp:
         while True:
             data = await queue.get()
@@ -104,10 +89,20 @@ async def sse(request):
             print("Event-o %s" % event)
             await resp.send(data)
 
-    return web.Response(resp)
+    return resp
+
+
+# Below handles any requests made from FE as Faust doesn't allow CORS
 
 aiohttp_app = app.web.web_app
-cors = aiohttp_cors.setup(aiohttp_app)
+cors = aiohttp_cors.setup(aiohttp_app, defaults={
+    "*": aiohttp_cors.ResourceOptions(
+            allow_credentials=True,
+            expose_headers="*",
+            allow_headers="*",
+        )
+})
+
 resource = cors.add(aiohttp_app.router.add_resource("/test"))
 cors.add(
     resource.add_route("GET", test), {
@@ -119,19 +114,10 @@ cors.add(
         )
     })
 
-sse_resource = cors.add(aiohttp_app.router.add_resource("/sse"))
-cors.add(
-    sse_resource.add_route("GET", sse), {
-        "*": aiohttp_cors.ResourceOptions(
-            allow_credentials=True,
-            expose_headers=("X-Custom-Server-Header",),
-            allow_headers=("X-Requested-With", "Content-Type"),
-            max_age=3600,
-        )
-    })
-
-
-
+cors.add(aiohttp_app.router.add_route("GET", "/sse", sse))
+cors.add(aiohttp_app.router.add_route("PUT", "/sse", sse))
+cors.add(aiohttp_app.router.add_route("POST", "/sse", sse))
+cors.add(aiohttp_app.router.add_route("DELETE", "/sse", sse))
 
 if __name__ == "__main__":
     logging.debug("Starting appp")
