@@ -32,13 +32,11 @@ app.clients = set()
 
 @app.agent(topic)
 async def testmeister(messages):
+    channel = app.channel()
     print('Faust cb is called')
-
     async for msg in messages:
-
-        for queue in app.clients:
-            print('About to put to queue')
-            await queue.put(msg)
+        print('About to put to queue')
+        await channel.put(msg)
 
 
 @app.page('/example')
@@ -79,18 +77,15 @@ async def test(request):
     return web.Response(text="haldo")
 
 
-async def sse(request):
-
+@app.page('/sse')
+async def sse(web, request):
+    channel = app.channel()
     print('SSES GETTING TO GOING')
-    queue = asyncio.Queue()
-    app.clients.add(queue)
-
     async with sse_response(request) as resp:
-        while True:
-            msg = await queue.get()
-            if msg is None:
+        async for event in channel:
+            if event is None:
                 break
-            await resp.send("EVENT: %s" % msg)
+            await resp.send("EVENT: %s" % event)
 
     return resp
 
@@ -117,10 +112,10 @@ cors.add(
         )
     })
 
-cors.add(aiohttp_app.router.add_route("GET", "/sse", sse))
-cors.add(aiohttp_app.router.add_route("PUT", "/sse", sse))
-cors.add(aiohttp_app.router.add_route("POST", "/sse", sse))
-cors.add(aiohttp_app.router.add_route("DELETE", "/sse", sse))
+# cors.add(aiohttp_app.router.add_route("GET", "/sse", sse))
+# cors.add(aiohttp_app.router.add_route("PUT", "/sse", sse))
+# cors.add(aiohttp_app.router.add_route("POST", "/sse", sse))
+# cors.add(aiohttp_app.router.add_route("DELETE", "/sse", sse))
 
 if __name__ == "__main__":
     logging.debug("Starting appp")
