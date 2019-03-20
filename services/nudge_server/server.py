@@ -10,7 +10,9 @@ import codecs
 from datetime import datetime
 from aiohttp import web
 
-from aiohttp_sse import sse_response
+from functools import partial
+
+from aiohttp_sse import EventSourceResponse, sse_response
 
 import aiohttp_cors
 
@@ -31,9 +33,11 @@ app.clients = set()
 @app.agent(topic)
 async def testmeister(messages):
     print('Faust cb is called')
+
     async for msg in messages:
-        print(msg)
+
         for queue in app.clients:
+            print('About to put to queue')
             await queue.put(msg)
 
 
@@ -76,24 +80,19 @@ async def test(request):
 
 
 async def sse(request):
-    # queue = asyncio.Queue()
-    # app.clients.add(queue)
 
-    print('What is SSEs')
+    print('SSES GETTING TO GOING')
+    queue = asyncio.Queue()
+    app.clients.add(queue)
+
     async with sse_response(request) as resp:
         while True:
-            data = 'Server Time : {}'.format(datetime.now())
-            print(data)
-            await resp.send(data)
-            await asyncio.sleep(1.0)
+            msg = await queue.get()
+            if msg is None:
+                break
+            await resp.send("EVENT: %s" % msg)
+
     return resp
-        # while True:
-        #     data = await queue.get()
-        #     event = ServerSentEvent(data)
-        #     print("Event-o %s" % event)
-        #     await resp.send(data)
-
-
 
 
 # Below handles any requests made from FE as Faust doesn't allow CORS
