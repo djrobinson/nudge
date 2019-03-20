@@ -14,7 +14,6 @@ from aiohttp_sse import sse_response
 
 import aiohttp_cors
 
-from objects.kafka.market_consumer import MarketConsumer
 from sockets.exchanges.poloniex_socket import PoloniexWS
 
 
@@ -79,8 +78,6 @@ async def test(request):
 async def sse(request):
     queue = asyncio.Queue()
     app.clients.add(queue)
-
-    print("Calling SSE!!!!!!!!!!!!!!!!!!!!!!")
 
     async with sse_response(request) as resp:
         while True:

@@ -1,9 +1,11 @@
 # wip
 
-Nudge: Automating boring cryptocurrency workflows
+Nudge: Your crypto dashboard
 
-- Flask
-- Redis Queue
-- PySpark 
+- Faust
+- Kafka
+- PySpark
+- React/Redux 
+- D3 Charts
 - Docker
 

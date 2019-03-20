@@ -42,8 +42,8 @@ class TestSocket extends React.Component {
   render() {
     return (
       <div>
-        <h1>Halasdfsddo</h1>
-        Count: <strong>{this.state.count}</strong>
+        <h1>Testing Redux</h1>
+        <h5>Count: <strong>{this.state.count}</strong></h5>
         <button onClick={()=> this.startWebSocket()}>Start WS</button>
       </div>
     );
