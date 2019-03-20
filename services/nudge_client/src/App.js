@@ -16,7 +16,7 @@ class App extends Component {
         <button onClick={this.simpleAction}>Test action</button>
         <pre>
          {
-          JSON.stringify(this.props)
+          JSON.stringify(this.props.result)
          }
         </pre>
     </header>
