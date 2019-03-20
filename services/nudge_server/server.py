@@ -76,17 +76,24 @@ async def test(request):
 
 
 async def sse(request):
-    queue = asyncio.Queue()
-    app.clients.add(queue)
+    # queue = asyncio.Queue()
+    # app.clients.add(queue)
 
+    print('What is SSEs')
     async with sse_response(request) as resp:
         while True:
-            data = await queue.get()
-            event = ServerSentEvent(data)
-            print("Event-o %s" % event)
+            data = 'Server Time : {}'.format(datetime.now())
+            print(data)
             await resp.send(data)
-
+            await asyncio.sleep(1.0)
     return resp
+        # while True:
+        #     data = await queue.get()
+        #     event = ServerSentEvent(data)
+        #     print("Event-o %s" % event)
+        #     await resp.send(data)
+
+
 
 
 # Below handles any requests made from FE as Faust doesn't allow CORS
