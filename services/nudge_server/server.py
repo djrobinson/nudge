@@ -79,15 +79,22 @@ async def test(request):
 
 @app.page('/sse')
 async def sse(web, request):
-    channel = app.channel()
-    print('SSES GETTING TO GOING')
-    async with sse_response(request) as resp:
-        async for event in channel:
-            if event is None:
-                break
-            await resp.send("EVENT: %s" % event)
+    # queue = asyncio.Queue()
+    # app.clients.add(queue)
 
+    print('What is SSEs')
+    async with sse_response(request) as resp:
+        while True:
+            data = 'Server Time : {}'.format(datetime.now())
+            print(data)
+            await resp.send(data)
+            await asyncio.sleep(1.0)
     return resp
+    # while True:
+    #     data = await queue.get()
+    #     event = ServerSentEvent(data)
+    #     print("Event-o %s" % event)
+    #     await resp.send(data)
 
 
 # Below handles any requests made from FE as Faust doesn't allow CORS
@@ -112,10 +119,10 @@ cors.add(
         )
     })
 
-# cors.add(aiohttp_app.router.add_route("GET", "/sse", sse))
-# cors.add(aiohttp_app.router.add_route("PUT", "/sse", sse))
-# cors.add(aiohttp_app.router.add_route("POST", "/sse", sse))
-# cors.add(aiohttp_app.router.add_route("DELETE", "/sse", sse))
+cors.add(aiohttp_app.router.add_route("GET", "/sse", sse))
+cors.add(aiohttp_app.router.add_route("PUT", "/sse", sse))
+cors.add(aiohttp_app.router.add_route("POST", "/sse", sse))
+cors.add(aiohttp_app.router.add_route("DELETE", "/sse", sse))
 
 if __name__ == "__main__":
     logging.debug("Starting appp")
