@@ -29,9 +29,10 @@ topic = app.topic(
 
 queue = asyncio.Queue()
 
-def mysink(value):
-    print(f'AGENT YIELD: {value!r}')
-    queue.put(value)
+async def mysink(stream):
+    async for event in stream:
+        print(f'AGENT YIELD: {value!r}')
+        yield event
 
 @app.agent(topic, sink=[mysink])
 async def testmeister(messages):
@@ -75,42 +76,37 @@ class ServerSentEvent:
         return message.encode('utf-8')
 
 @app.page('/test')
-async def test(web, request):
+async def test(self, request):
     return web.Response(text="haldo")
 
-
-async def sse(request):
+@app.page('/sse')
+async def sse(self, request):
 
     print('What is SSEs')
     async with sse_response(request) as resp:
         while True:
-    #         data = 'Server Time : {}'.format(datetime.now())
-    #         print(data)
-    #         await resp.send(data)
-    #         await asyncio.sleep(1.0)
-    # return resp
-            data = await queue.get()
-            print("Event-o %s" % data)
+            # data = await mysink()
+            data = 'Server Time : {}'.format(datetime.now())
+            print(data)
             await resp.send(data)
+            await asyncio.sleep(1.0)
     return resp
+
 
 
 # Below handles any requests made from FE as Faust doesn't allow CORS
 
 aiohttp_app = app.web.web_app
-cors = aiohttp_cors.setup(aiohttp_app, defaults={
-    "*": aiohttp_cors.ResourceOptions(
-            allow_credentials=True,
-            expose_headers="*",
-            allow_headers="*",
-        )
-})
+cors = aiohttp_cors.setup(aiohttp_app)
 
-cors.add(aiohttp_app.router.add_route("GET", "/sse", sse))
-cors.add(aiohttp_app.router.add_route("PUT", "/sse", sse))
-cors.add(aiohttp_app.router.add_route("POST", "/sse", sse))
-cors.add(aiohttp_app.router.add_route("DELETE", "/sse", sse))
+print("What is router: %s" % str(aiohttp_app.router.resources))
+
+resources = aiohttp_app.router.resources()
+for resource in resources:
+    print("What is resource: %s " % resource.__dict__.keys())
+    cors.add(resource)
 
 if __name__ == "__main__":
     logging.debug("Starting appp")
+
     app.main()
