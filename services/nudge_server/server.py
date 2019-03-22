@@ -27,16 +27,17 @@ topic = app.topic(
     'testtopic1'
 )
 
-app.clients = set()
+clients = set()
 
 
 @app.agent(topic)
 async def testmeister(messages):
-    channel = app.channel()
     print('Faust cb is called')
-    async for msg in messages:
-        print('About to put to queue')
-        await channel.put(msg)
+    if len(clients):
+        async for queue in clients:
+            async for msg in messages:
+                print('About to put to queue')
+                await queue.put(msg)
 
 
 @app.page('/example')
@@ -72,29 +73,28 @@ class ServerSentEvent:
         message = f"{message}\r\n\r\n"
         return message.encode('utf-8')
 
-
+@app.page('/test')
 async def test(request):
     return web.Response(text="haldo")
 
 
 @app.page('/sse')
 async def sse(web, request):
-    # queue = asyncio.Queue()
-    # app.clients.add(queue)
-
+    queue = asyncio.Queue()
+    clients.add(queue)
     print('What is SSEs')
     async with sse_response(request) as resp:
+    #     while True:
+    #         data = 'Server Time : {}'.format(datetime.now())
+    #         print(data)
+    #         await resp.send(data)
+    #         await asyncio.sleep(1.0)
+    # return resp
         while True:
-            data = 'Server Time : {}'.format(datetime.now())
-            print(data)
+            data = await queue.get()
+            print("Event-o %s" % data)
             await resp.send(data)
-            await asyncio.sleep(1.0)
     return resp
-    # while True:
-    #     data = await queue.get()
-    #     event = ServerSentEvent(data)
-    #     print("Event-o %s" % event)
-    #     await resp.send(data)
 
 
 # Below handles any requests made from FE as Faust doesn't allow CORS
