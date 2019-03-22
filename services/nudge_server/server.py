@@ -27,17 +27,18 @@ topic = app.topic(
     'testtopic1'
 )
 
-clients = set()
+queue = asyncio.Queue()
 
+def mysink(value):
+    print(f'AGENT YIELD: {value!r}')
+    queue.put(value)
 
-@app.agent(topic)
+@app.agent(topic, sink=[mysink])
 async def testmeister(messages):
     print('Faust cb is called')
-    if len(clients):
-        async for queue in clients:
-            async for msg in messages:
-                print('About to put to queue')
-                await queue.put(msg)
+    async for msg in messages:
+        print('About to put to queue')
+        yield msg
 
 
 @app.page('/example')
@@ -74,23 +75,20 @@ class ServerSentEvent:
         return message.encode('utf-8')
 
 @app.page('/test')
-async def test(request):
+async def test(web, request):
     return web.Response(text="haldo")
 
 
-@app.page('/sse')
-async def sse(web, request):
-    queue = asyncio.Queue()
-    clients.add(queue)
+async def sse(request):
+
     print('What is SSEs')
     async with sse_response(request) as resp:
-    #     while True:
+        while True:
     #         data = 'Server Time : {}'.format(datetime.now())
     #         print(data)
     #         await resp.send(data)
     #         await asyncio.sleep(1.0)
     # return resp
-        while True:
             data = await queue.get()
             print("Event-o %s" % data)
             await resp.send(data)
@@ -107,17 +105,6 @@ cors = aiohttp_cors.setup(aiohttp_app, defaults={
             allow_headers="*",
         )
 })
-
-resource = cors.add(aiohttp_app.router.add_resource("/test"))
-cors.add(
-    resource.add_route("GET", test), {
-        "*": aiohttp_cors.ResourceOptions(
-            allow_credentials=True,
-            expose_headers=("X-Custom-Server-Header",),
-            allow_headers=("X-Requested-With", "Content-Type"),
-            max_age=3600,
-        )
-    })
 
 cors.add(aiohttp_app.router.add_route("GET", "/sse", sse))
 cors.add(aiohttp_app.router.add_route("PUT", "/sse", sse))
