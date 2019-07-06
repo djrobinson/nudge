@@ -18,5 +18,7 @@ COPY ./ /usr/src/server
 # Make our entrypoint executable
 RUN chmod +x ./boot.sh
 
+EXPOSE 6066
+
 # Set the entrypoint
 ENTRYPOINT ["sh", "./boot.sh"]

@@ -24,6 +24,7 @@ services:
       context: ./services/nudge_server
       dockerfile: Dockerfile
     ports:
+      - "5000:5000"
       - "6066:6066"
     environment:
       - PYTHONUNBUFFERED=0

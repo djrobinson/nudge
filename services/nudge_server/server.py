@@ -10,16 +10,64 @@ import codecs
 from datetime import datetime
 from aiohttp import web
 
-from functools import partial
-
-from aiohttp_sse import EventSourceResponse, sse_response
-
-import aiohttp_cors
+import websockets
+from mode import Service
+from websockets.exceptions import ConnectionClosed
+from websockets.server import WebSocketServerProtocol
 
 from sockets.exchanges.poloniex_socket import PoloniexWS
 
+queue = []
 
-app = faust.App(
+class Websockets(Service):
+
+    def __init__(self, app, bind ='127.0.0.1', port = 5000, **kwargs):
+        self.app = app
+        self.bind = bind
+        self.port = port
+        self.clients = set()
+        super().__init__(**kwargs)
+
+    async def register(self, ws):
+        logging.info('We on register')
+        self.clients.add(ws)
+
+    async def on_message(self, ws, message):
+        logging.info( "ON MESSAGE", message)
+        await ws.send(message)
+
+    async def on_messages(self,
+                          ws: WebSocketServerProtocol,
+                          path: str) -> None:
+        print('yo got a message right here dooooeeee')
+        await self.register(ws)
+        logging.info('We getting to onmessage?')
+        try:
+            await ws.send('haldo')
+        except ConnectionClosed:
+            logging.info('We at on close')
+            await self.on_close(ws)
+        except asyncio.CancelledError:
+            pass
+
+    async def on_close(self, ws):
+        # called when websocket socket is closed.
+        logging.info('WS close')
+
+    @Service.task
+    async def _background_server(self):
+        logging.info("When is background server called")
+        await websockets.serve(self.on_messages, self.bind, self.port)
+
+class App(faust.App):
+   def on_init(self):
+       logging.info("What is init dependencies")
+       self.ws = Websockets(self)
+
+   async def on_start(self):
+       await self.add_runtime_dependency(self.ws)
+
+app = App(
     'testtopic1',
     broker='kafka://kafka:9092'
 )
@@ -27,20 +75,13 @@ topic = app.topic(
     'testtopic1'
 )
 
-queue = asyncio.Queue()
 
-async def mysink(stream):
-    async for event in stream:
-        print(f'AGENT YIELD: {value!r}')
-        yield event
-
-@app.agent(topic, sink=[mysink])
+@app.agent(topic)
 async def testmeister(messages):
     print('Faust cb is called')
     async for msg in messages:
         print('About to put to queue')
-        yield msg
-
+        queue.append(msg)
 
 @app.page('/example')
 async def example(web, request):
@@ -79,34 +120,9 @@ class ServerSentEvent:
 async def test(self, request):
     return web.Response(text="haldo")
 
-@app.page('/sse')
-async def sse(self, request):
-
-    print('What is SSEs')
-    async with sse_response(request) as resp:
-        while True:
-            # data = await mysink()
-            data = 'Server Time : {}'.format(datetime.now())
-            print(data)
-            await resp.send(data)
-            await asyncio.sleep(1.0)
-    return resp
-
-
-
-# Below handles any requests made from FE as Faust doesn't allow CORS
-
-aiohttp_app = app.web.web_app
-cors = aiohttp_cors.setup(aiohttp_app)
-
-print("What is router: %s" % str(aiohttp_app.router.resources))
-
-resources = aiohttp_app.router.resources()
-for resource in resources:
-    print("What is resource: %s " % resource.__dict__.keys())
-    cors.add(resource)
 
 if __name__ == "__main__":
-    logging.debug("Starting appp")
-
+    logging.info("Starting appp")
+    asyncio.ensure_future(app.ws._background_server)
     app.main()
+
