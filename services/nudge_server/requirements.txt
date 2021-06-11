@@ -7,4 +7,4 @@ faust[eventlet]==1.4.6
 eventlet==0.24.1
 aiohttp-sse==2.0.0
 aiohttp_cors==0.7.0
-websockets==7.0
+websockets==9.1
